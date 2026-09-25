@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản trị – AI Là Triệu Phú Vòng 2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#07152f;--panel:#0d2250;--line:rgba(255,222,143,.22);--gold:#f4c96a;--gold2:#ffe6a0;--ivory:#fff8df;--muted:#b9c6dc;--green:#6ee0a1;--red:#ff8991;--amber:#ffb04a}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"DM Sans",sans-serif;color:var(--ivory);background:radial-gradient(circle at 50% 0,rgba(52,101,175,.35),transparent 40%),linear-gradient(145deg,#061126,#0a1e48 60%,#07142d);min-height:100vh}
+  .wrap{max-width:1200px;margin:auto;padding:24px 16px 60px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  h1{font-family:"Playfair Display",serif;font-weight:900;margin:0;font-size:clamp(1.5rem,4vw,2.2rem);color:var(--gold2)}
+  .sub{color:var(--muted);font-size:.9rem;margin-top:4px}
+  .btns{display:flex;gap:8px;flex-wrap:wrap}
+  button{font:inherit;cursor:pointer;border-radius:10px;padding:10px 16px;font-weight:700;letter-spacing:.04em;border:1px solid #ffe09b;color:#fff7dc;background:linear-gradient(135deg,#c24a3c,#8e1730)}
+  button.ghost{background:rgba(7,23,52,.7);color:var(--gold2);border-color:rgba(244,201,106,.52)}
+  button:disabled{opacity:.6;cursor:wait}
+  .panel{background:linear-gradient(140deg,rgba(19,48,98,.79),rgba(5,18,44,.72));border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:18px}
+  .panel h2{margin:0 0 12px;font-size:.8rem;letter-spacing:.16em;color:var(--gold)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:18px}
+  .kpi{background:rgba(4,18,47,.55);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .kpi span{font-size:.72rem;letter-spacing:.1em;color:var(--muted);font-weight:700}
+  .kpi strong{display:block;font-family:"Playfair Display",serif;font-size:1.9rem;color:var(--gold2);margin-top:4px}
+  .kpi small{color:var(--muted)}
+  .status{display:flex;align-items:center;gap:8px;font-weight:700}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+  .dot.live{background:var(--green);box-shadow:0 0 10px var(--green)}.dot.wait{background:var(--amber)}.dot.end{background:var(--red)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  th{font-size:.7rem;letter-spacing:.1em;color:var(--gold);font-weight:700}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  tr.top1 td{background:rgba(244,201,106,.14)}tr.top1 td:first-child{color:var(--gold2);font-weight:800}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:700;white-space:nowrap}
+  .tag.done{background:rgba(44,164,108,.28);color:#a9f3c9}.tag.playing{background:rgba(244,201,106,.22);color:var(--gold2)}.tag.none{background:rgba(255,255,255,.08);color:#aab}
+  .bar{height:10px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;min-width:80px}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#b82538,#f4c96a)}
+  .scroll{overflow-x:auto}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .hist{display:flex;align-items:flex-end;gap:6px;height:150px;padding-top:10px}
+  .hist div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:.7rem;color:var(--muted)}
+  .hist b{display:block;width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#ffe6a0,#b8842f);min-height:2px}
+  .hist em{font-style:normal;color:var(--ivory);font-weight:700;margin-bottom:3px}
+  .info{color:var(--muted);font-size:.85rem;margin-top:10px}
+  .err{color:var(--red);font-weight:700}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}.hide-sm{display:none}table{font-size:.8rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>📊 Thống kê – AI Là Triệu Phú Vòng 2</h1>
+      <div class="sub" id="sched"></div>
+    </div>
+    <div class="btns">
+      <button id="exportBtn" type="button">⬇ Xuất Excel</button>
+      <button id="refreshBtn" class="ghost" type="button">↻ Tải lại</button>
+      <button id="autoBtn" class="ghost" type="button">⏵ Tự cập nhật: BẬT</button>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><span>TRẠNG THÁI</span><strong class="status" style="font-size:1.1rem;margin-top:12px"><i class="dot" id="stDot"></i><span id="stText">—</span></strong><small id="stSub"></small></div>
+    <div class="kpi"><span>ĐÃ THAM GIA</span><strong id="kJoined">0</strong><small id="kJoinedSub"></small></div>
+    <div class="kpi"><span>HOÀN THÀNH</span><strong id="kDone">0</strong><small id="kDoneSub"></small></div>
+    <div class="kpi"><span>ĐIỂM TRUNG BÌNH</span><strong id="kAvg">0</strong><small id="kAvgSub"></small></div>
+    <div class="kpi"><span>ĐIỂM CAO NHẤT</span><strong id="kTop">0</strong><small id="kTopSub"></small></div>
+    <div class="kpi"><span>TG TRUNG BÌNH / CÂU</span><strong id="kSec">0</strong><small>giây</small></div>
+  </div>
+
+  <div class="panel">
+    <h2>🏆 BẢNG XẾP HẠNG</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>#</th><th>Họ tên</th><th class="hide-sm">Phòng ban</th><th>Trạng thái</th><th class="n">Điểm</th><th class="n">Đúng</th><th class="n">Đã chơi</th><th class="n">Tổng giây</th><th class="hide-sm">Bắt đầu</th><th class="hide-sm">Kết thúc</th><th class="hide-sm">Lý do dừng</th></tr></thead>
+      <tbody id="rankBody"></tbody>
+    </table></div>
+    <div class="info">Xếp hạng: điểm cao hơn trước → nhiều câu đúng hơn → tổng thời gian ít hơn.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>📈 PHÂN BỐ SỐ CÂU ĐÚNG</h2>
+      <div class="hist" id="hist"></div>
+    </div>
+    <div class="panel">
+      <h2>🛟 SỬ DỤNG TRỢ GIÚP & KẾT THÚC</h2>
+      <table><tbody id="helpBody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>❓ THỐNG KÊ THEO CÂU HỎI</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Mã</th><th>Câu hỏi</th><th class="n">Lượt trả lời</th><th class="n">Đúng</th><th>Tỉ lệ đúng</th><th class="n">TG TB (giây)</th></tr></thead>
+      <tbody id="qBody"></tbody>
+    </table></div>
+    <div class="info">Mã G1 = nhóm dễ (câu 1–5), G2 = nhóm trung bình (câu 6–10), G3 = nhóm khó (câu 11–15), P = câu phụ (Đổi câu). Mỗi người nhận thứ tự câu hỏi khác nhau trong cùng nhóm.</div>
+  </div>
+  <p class="info" id="info"></p>
+</div>
+
+<script>
+const FIREBASE_CONFIG = { apiKey: "AIzaSyBM702kTcvP4kGb9iIeSmS4qeGMajouB3o", projectId: "content-planner-vps" };
+const COLLECTION = "5xi";
+const GAME_START = new Date("2026-09-25T11:30:00+07:00");
+const GAME_END = new Date(GAME_START.getTime() + 20*60000);
+const PLAYERS = ["Lê Hồng Hà", "Nguyễn Thị Tuyết Trinh", "Nguyễn Hoàng Tuyết Khanh", "La Thúy Huyền Trân", "Phan Thị Bích Phượng", "Nguyễn Hoàng Vinh", "Nguyễn Đăng Khoa", "Nguyễn Ngọc Tường Vân", "Bùi Thị Mai Hương", "Hoàng Vĩnh Phúc", "Võ Đại Lộc", "Lê Thị Dinh", "Đặng Ngọc Lan", "Đỗ Thị Ngọc Liên", "Phạm Thị Kiều Trinh", "Phạm Thị Thảo Hương", "Lê Đông Hồ", "Phạm Nguyễn Mỹ Yến", "Vinh#test", "Khoa#test"];
+const FB_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents`;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const vn=n=>Number(n||0).toLocaleString('vi-VN');
+const sec=ms=>ms==null?'':(Math.round(ms/100)/10);
+function fromFields(f){const o={};for(const[k,v]of Object.entries(f||{})){o[k]=v.stringValue??(v.integerValue!=null?Number(v.integerValue):v.timestampValue??v.booleanValue??null)}return o}
+function vnDT(v){if(!v)return'';const d=new Date(v);if(isNaN(d))return'';const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(d).map(x=>[x.type,x.value]));return`${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`}
+const hm=d=>d.toLocaleTimeString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit'});
+const REASON={completed:'Hoàn thành 15 câu',timeout:'Hết giờ 1 câu',closed:'Hết giờ chương trình'};
+
+async function fetchAll(){
+  if(!FIREBASE_CONFIG.apiKey){try{return Object.entries(JSON.parse(localStorage.getItem('tt5xi_demo')||'{}')).map(([id,v])=>({id,...v}))}catch{return[]}}
+  let out=[],token='';
+  do{const r=await fetch(`${FB_BASE}/${COLLECTION}?pageSize=300&key=${FIREBASE_CONFIG.apiKey}${token?'&pageToken='+token:''}`);if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();(j.documents||[]).forEach(d=>out.push({id:d.name.split('/').pop(),...fromFields(d.fields)}));token=j.nextPageToken||''}while(token);
+  return out;
+}
+let DATA=[];
+function ranked(){return[...DATA].sort((a,b)=>(b.score||0)-(a.score||0)||(b.correct||0)-(a.correct||0)||(a.totalTimeMs??1e12)-(b.totalTimeMs??1e12))}
+function answersOf(r){try{return JSON.parse(r.answers||'[]')}catch{return[]}}
+
+function render(){
+  const now=Date.now();
+  const st=now<GAME_START?['wait','CHƯA BẮT ĐẦU',`Mở lúc ${hm(GAME_START)}`]:now<GAME_END?['live','ĐANG DIỄN RA',`Còn ${Math.ceil((GAME_END-now)/60000)} phút`]:['end','ĐÃ KẾT THÚC',`Đóng lúc ${hm(GAME_END)}`];
+  $('stDot').className='dot '+st[0];$('stText').textContent=st[1];$('stSub').textContent=st[2];
+  $('sched').textContent=`Khung giờ: ${hm(GAME_START)} – ${hm(GAME_END)} ngày ${GAME_START.toLocaleDateString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'})} · Collection: ${COLLECTION}`;
+  const done=DATA.filter(r=>r.status==='done');
+  $('kJoined').textContent=DATA.length;$('kJoinedSub').textContent=`/ ${PLAYERS.length} người trong danh sách`;
+  $('kDone').textContent=done.length;$('kDoneSub').textContent=`${DATA.length-done.length} đang chơi / bỏ dở`;
+  const avg=done.length?done.reduce((s,r)=>s+(r.score||0),0)/done.length:0;
+  $('kAvg').textContent=vn(Math.round(avg));$('kAvgSub').textContent='/ 10.500 điểm';
+  const R=ranked();$('kTop').textContent=R[0]?vn(R[0].score):'0';$('kTopSub').textContent=R[0]?R[0].name:'';
+  const totMs=DATA.reduce((s,r)=>s+(r.totalTimeMs||0),0),totPlayed=DATA.reduce((s,r)=>s+(r.played||0),0);
+  $('kSec').textContent=totPlayed?(totMs/1000/totPlayed).toLocaleString('vi-VN',{maximumFractionDigits:1}):'0';
+
+  // bảng xếp hạng + người chưa chơi
+  const playedNames=new Set(DATA.map(r=>r.name));
+  let i=0;
+  $('rankBody').innerHTML=R.map(r=>{const tag=r.status==='done'?'<span class="tag done">Đã xong</span>':'<span class="tag playing">Đang chơi / bỏ dở</span>';const rk=r.status==='done'?++i:'';
+    return`<tr class="${rk===1?'top1':''}"><td>${rk===1?'🥇':rk===2?'🥈':rk===3?'🥉':rk}</td><td>${esc(r.name)}</td><td class="hide-sm">${esc(r.department)}</td><td>${tag}</td><td class="n">${vn(r.score)}</td><td class="n">${r.correct||0}/15</td><td class="n">${r.played||0}/15</td><td class="n">${sec(r.totalTimeMs)}</td><td class="hide-sm">${vnDT(r.startedAt)}</td><td class="hide-sm">${vnDT(r.finishedAt)}</td><td class="hide-sm">${esc(REASON[r.endReason]||'')}</td></tr>`}).join('')
+   +PLAYERS.filter(n=>!playedNames.has(n)).map(n=>`<tr><td></td><td>${esc(n)}</td><td class="hide-sm"></td><td><span class="tag none">Chưa chơi</span></td><td></td><td></td><td></td><td></td><td class="hide-sm"></td><td class="hide-sm"></td><td class="hide-sm"></td></tr>`).join('');
+
+  // histogram số câu đúng
+  const buckets=Array(16).fill(0);done.forEach(r=>buckets[Math.min(15,r.correct||0)]++);const mx=Math.max(1,...buckets);
+  $('hist').innerHTML=buckets.map((c,k)=>`<div><em>${c||''}</em><b style="height:${c/mx*100}%"></b>${k}</div>`).join('');
+
+  // trợ giúp
+  const u5=DATA.filter(r=>r.used5050).length,uc=DATA.filter(r=>r.usedChange).length;
+  const reasons={};done.forEach(r=>reasons[r.endReason||'?']=(reasons[r.endReason||'?']||0)+1);
+  $('helpBody').innerHTML=[['Dùng 50:50',u5],['Dùng Đổi câu',uc],...Object.entries(reasons).map(([k,v])=>['Kết thúc: '+(REASON[k]||k),v])].map(([a,b])=>`<tr><td>${esc(a)}</td><td class="n"><b>${b}</b></td></tr>`).join('');
+
+  // theo câu hỏi
+  const Q={};DATA.forEach(r=>answersOf(r).forEach(a=>{const q=Q[a.qid]??={qid:a.qid,q:a.q,n:0,ok:0,ms:0};q.n++;if(a.ok)q.ok++;q.ms+=a.ms||0}));
+  const qs=Object.values(Q).sort((a,b)=>a.qid.localeCompare(b.qid,undefined,{numeric:true}));
+  $('qBody').innerHTML=qs.length?qs.map(q=>{const p=q.n?q.ok/q.n*100:0;return`<tr><td>${esc(q.qid)}</td><td>${esc(q.q)}</td><td class="n">${q.n}</td><td class="n">${q.ok}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="width:${p}%"></i></div><b>${Math.round(p)}%</b></div></td><td class="n">${q.n?(q.ms/q.n/1000).toFixed(1):''}</td></tr>`}).join(''):'<tr><td colspan="6" style="color:var(--muted)">Chưa có dữ liệu.</td></tr>';
+}
+async function load(){
+  $('info').textContent='Đang tải…';
+  try{DATA=(await fetchAll()).map(r=>({...r,name:r.name||r.id}));render();$('info').textContent=`Cập nhật lúc ${vnDT(new Date())} · ${DATA.length} bản ghi`}
+  catch(e){console.error(e);$('info').innerHTML='<span class="err">⚠ Không tải được dữ liệu từ Firebase. Kiểm tra mạng và Rules (collection 5xi cần allow read).</span>'}
+}
+function loadScript(src){return new Promise((ok,err)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=err;document.head.appendChild(t)})}
+async function exportXlsx(){
+  const btn=$('exportBtn');btn.disabled=true;
+  try{
+    await load();
+    const R=ranked();let i=0;
+    const rank=[['Hạng','Họ tên','Phòng ban','Trạng thái','Điểm','Số câu đúng','Số câu đã chơi','Thời gian bắt đầu','Thời gian kết thúc','Số giây trả lời tất cả','Lý do dừng','Dùng 50:50','Dùng Đổi câu'],
+      ...R.map(r=>[r.status==='done'?++i:'',r.name,r.department||'',r.status==='done'?'Đã xong':'Đang chơi / bỏ dở',r.score||0,r.correct||0,r.played||0,vnDT(r.startedAt),r.status==='done'?vnDT(r.finishedAt):'(chưa hoàn thành)',r.totalTimeMs!=null?sec(r.totalTimeMs):'',REASON[r.endReason]||'',r.used5050?'Có':'',r.usedChange?'Có':'']),
+      ...PLAYERS.filter(n=>!DATA.some(r=>r.name===n)).map(n=>['',n,'','Chưa chơi','','','','','','','','',''])];
+    const detail=[['Họ tên','Vị trí câu','Mã câu','Câu hỏi','Đáp án chọn','Đúng/Sai','Số giây','Câu phụ']];
+    R.forEach(r=>answersOf(r).forEach(a=>detail.push([r.name,a.pos,a.qid,a.q,a.choice||'',a.ok?'Đúng':'Sai',sec(a.ms),a.bonus?'Có':''])));
+    const Q={};DATA.forEach(r=>answersOf(r).forEach(a=>{const q=Q[a.qid]??={qid:a.qid,q:a.q,n:0,ok:0,ms:0};q.n++;if(a.ok)q.ok++;q.ms+=a.ms||0}));
+    const qsheet=[['Mã câu','Câu hỏi','Lượt trả lời','Số đúng','Tỉ lệ đúng (%)','TG TB (giây)'],...Object.values(Q).sort((a,b)=>a.qid.localeCompare(b.qid,undefined,{numeric:true})).map(q=>[q.qid,q.q,q.n,q.ok,q.n?Math.round(q.ok/q.n*1000)/10:0,q.n?Math.round(q.ms/q.n/100)/10:''])];
+    const fname=`ThongKe_TrungThu_Vong2_${vnDT(new Date()).replace(/[\/: ]/g,m=>m===' '?'_':'-')}`;
+    try{
+      if(!window.XLSX)await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      const wb=XLSX.utils.book_new();
+      const add=(aoa,name,cols)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=cols.map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws,name)};
+      add(rank,'Xep hang',[6,28,18,18,8,12,14,21,21,22,22,10,12]);add(qsheet,'Theo cau hoi',[8,80,12,9,14,12]);add(detail,'Chi tiet tra loi',[26,10,8,80,40,9,9,8]);
+      XLSX.writeFile(wb,fname+'.xlsx');
+    }catch(e){
+      const csv='﻿'+rank.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=fname+'.csv';a.click();
+    }
+  }finally{btn.disabled=false}
+}
+let auto=true,timer=null;
+function setAuto(v){auto=v;$('autoBtn').textContent='⏵ Tự cập nhật: '+(v?'BẬT':'TẮT');clearInterval(timer);if(v)timer=setInterval(load,15000)}
+$('refreshBtn').onclick=load;$('exportBtn').onclick=exportXlsx;$('autoBtn').onclick=()=>setAuto(!auto);
+setInterval(render,30000);load();setAuto(true);
+</script>
+</body>
+</html>
