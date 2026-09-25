@@ -104,7 +104,7 @@
 <script>
 const FIREBASE_CONFIG = { apiKey: "AIzaSyBM702kTcvP4kGb9iIeSmS4qeGMajouB3o", projectId: "content-planner-vps" };
 const COLLECTION = "5xi";
-const GAME_START = new Date("2026-09-25T11:30:00+07:00");
+const GAME_START = new Date("2026-09-25T11:40:00+07:00");
 const GAME_END = new Date(GAME_START.getTime() + 20*60000);
 const PLAYERS = ["Lê Hồng Hà", "Nguyễn Thị Tuyết Trinh", "Nguyễn Hoàng Tuyết Khanh", "La Thúy Huyền Trân", "Phan Thị Bích Phượng", "Nguyễn Hoàng Vinh", "Nguyễn Đăng Khoa", "Nguyễn Ngọc Tường Vân", "Bùi Thị Mai Hương", "Hoàng Vĩnh Phúc", "Võ Đại Lộc", "Lê Thị Dinh", "Đặng Ngọc Lan", "Đỗ Thị Ngọc Liên", "Phạm Thị Kiều Trinh", "Phạm Thị Thảo Hương", "Lê Đông Hồ", "Phạm Nguyễn Mỹ Yến", "Vinh#test", "Khoa#test"];
 const FB_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents`;
@@ -115,7 +115,7 @@ const sec=ms=>ms==null?'':(Math.round(ms/100)/10);
 function fromFields(f){const o={};for(const[k,v]of Object.entries(f||{})){o[k]=v.stringValue??(v.integerValue!=null?Number(v.integerValue):v.timestampValue??v.booleanValue??null)}return o}
 function vnDT(v){if(!v)return'';const d=new Date(v);if(isNaN(d))return'';const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(d).map(x=>[x.type,x.value]));return`${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`}
 const hm=d=>d.toLocaleTimeString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit'});
-const REASON={completed:'Hoàn thành 15 câu',timeout:'Hết giờ 1 câu',closed:'Hết giờ chương trình'};
+const REASON={completed:'Hoàn thành 15 câu',wrong:'Trả lời sai',timeout:'Hết giờ 1 câu',closed:'Hết giờ chương trình'};
 
 async function fetchAll(){
   if(!FIREBASE_CONFIG.apiKey){try{return Object.entries(JSON.parse(localStorage.getItem('tt5xi_demo')||'{}')).map(([id,v])=>({id,...v}))}catch{return[]}}
