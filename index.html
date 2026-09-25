@@ -117,7 +117,7 @@
           </div>
           <p id="form-error" class="hidden text-center text-sm font-semibold text-[#ffadb0]" role="alert"></p>
           <button id="start-button" class="primary-btn mt-3 w-full" type="submit">BẮT ĐẦU</button>
-          <p class="text-center text-xs text-[#cbd5e7]">Mỗi mã chỉ dùng được <b>01 lần</b> • 15 câu hỏi được xáo trộn riêng cho từng người • mỗi câu <b>60 giây</b></p>
+          <p class="text-center text-xs text-[#cbd5e7]">Mỗi mã chỉ dùng được <b>01 lần</b> • 15 câu hỏi xáo trộn riêng cho từng người • mỗi câu <b>60 giây</b> • <b>trả lời sai hoặc hết giờ là dừng</b></p>
           <p id="close-note" class="text-center text-sm font-bold text-[#f4c96a]"></p>
         </form>
       </div>
@@ -211,7 +211,7 @@
 /* ======================= CẤU HÌNH ======================= */
 const FIREBASE_CONFIG = { apiKey: "AIzaSyBM702kTcvP4kGb9iIeSmS4qeGMajouB3o", projectId: "content-planner-vps" };
 const COLLECTION = "5xi";
-const GAME_START = new Date("2026-09-25T11:30:00+07:00");   // giờ Việt Nam
+const GAME_START = new Date("2026-09-25T11:40:00+07:00");   // giờ Việt Nam
 const GAME_MINUTES = 20;
 const GAME_END = new Date(GAME_START.getTime() + GAME_MINUTES*60000);
 const SPLASH_SECONDS = 60;
@@ -225,34 +225,414 @@ const POINTS = [100,100,200,200,300,400,500,600,700,800,900,1000,1200,1500,2000]
 const MAX_SCORE = POINTS.reduce((a,b)=>a+b,0);
 const LETTERS = ["A","B","C","D"];
 const questionGroups = [
-  [
-    { question:"Tết Trung Thu ở Việt Nam thường diễn ra vào ngày nào theo âm lịch?", options:[{id:"a",text:"Rằm tháng Tám",correct:true},{id:"b",text:"Mùng Năm tháng Năm",correct:false},{id:"c",text:"Mùng Một tháng Giêng",correct:false},{id:"d",text:"Rằm tháng Giêng",correct:false}] },
-    { question:"Loại bánh truyền thống nào có vỏ nướng hoặc dẻo, thường xuất hiện trong dịp Trung Thu?", options:[{id:"a",text:"Bánh trung thu",correct:true},{id:"b",text:"Bánh chưng",correct:false},{id:"c",text:"Bánh tẻ",correct:false},{id:"d",text:"Bánh ít",correct:false}] },
-    { question:"Hình ảnh nào thường gắn với trẻ em rước đèn trong đêm Trung Thu?", options:[{id:"a",text:"Đèn ông sao",correct:true},{id:"b",text:"Đèn dầu",correct:false},{id:"c",text:"Đèn giao thông",correct:false},{id:"d",text:"Đèn biển",correct:false}] },
-    { question:"Nhân vật dân gian nào thường được nhắc đến cùng hình ảnh cây đa trên mặt trăng?", options:[{id:"a",text:"Chú Cuội",correct:true},{id:"b",text:"Sơn Tinh",correct:false},{id:"c",text:"Thánh Gióng",correct:false},{id:"d",text:"Mai An Tiêm",correct:false}] },
-    { question:"Con vật nào là linh vật quen thuộc trong các điệu múa dịp Trung Thu?", options:[{id:"a",text:"Lân",correct:true},{id:"b",text:"Hạc",correct:false},{id:"c",text:"Cò",correct:false},{id:"d",text:"Voi",correct:false}] }
-  ],
-  [
-    { question:"Trong mâm cỗ Trung Thu, loại quả nào thường được tỉa hoặc bày thành hình con vật?", options:[{id:"a",text:"Bưởi",correct:true},{id:"b",text:"Mít",correct:false},{id:"c",text:"Sầu riêng",correct:false},{id:"d",text:"Dừa",correct:false}] },
-    { question:"Phố cổ nào nổi tiếng với những chiếc đèn lồng rực rỡ trong đêm hội trăng rằm?", options:[{id:"a",text:"Hội An",correct:true},{id:"b",text:"Sa Pa",correct:false},{id:"c",text:"Đà Lạt",correct:false},{id:"d",text:"Nha Trang",correct:false}] },
-    { question:"Tên gọi “phá cỗ” trong Trung Thu thường chỉ hoạt động nào?", options:[{id:"a",text:"Cùng thưởng thức mâm cỗ sau khi ngắm trăng",correct:true},{id:"b",text:"Làm vỡ đồ trang trí",correct:false},{id:"c",text:"Đốt pháo hoa",correct:false},{id:"d",text:"Dọn dẹp sân đình",correct:false}] },
-    { question:"Trống được dùng để dẫn nhịp cho múa lân thường được gọi là gì?", options:[{id:"a",text:"Trống lân",correct:true},{id:"b",text:"Trống cơm",correct:false},{id:"c",text:"Trống trận",correct:false},{id:"d",text:"Trống chầu",correct:false}] },
-    { question:"Theo quan niệm dân gian, ánh trăng rằm tháng Tám thường tượng trưng cho điều gì?", options:[{id:"a",text:"Đoàn viên và viên mãn",correct:true},{id:"b",text:"Chia xa và thử thách",correct:false},{id:"c",text:"Mùa đông giá lạnh",correct:false},{id:"d",text:"Khởi đầu năm mới",correct:false}] }
-  ],
-  [
-    { question:"Lễ hội Trung Thu hiện đại ở nhiều nơi thường có hoạt động nào dành cho trẻ em?", options:[{id:"a",text:"Rước đèn",correct:true},{id:"b",text:"Đua thuyền",correct:false},{id:"c",text:"Cày ruộng",correct:false},{id:"d",text:"Hái lộc đầu năm",correct:false}] },
-    { question:"Đèn kéo quân truyền thống tạo hình chuyển động nhờ yếu tố nào?", options:[{id:"a",text:"Luồng khí nóng từ ngọn nến",correct:true},{id:"b",text:"Pin mặt trời",correct:false},{id:"c",text:"Động cơ điện",correct:false},{id:"d",text:"Nước chảy",correct:false}] },
-    { question:"Màu nào thường tạo cảm giác ấm áp và may mắn trong không khí lễ hội Trung Thu?", options:[{id:"a",text:"Đỏ",correct:true},{id:"b",text:"Xám",correct:false},{id:"c",text:"Nâu đậm",correct:false},{id:"d",text:"Đen",correct:false}] },
-    { question:"Bài hát thiếu nhi nào có câu mở đầu “Chiếc đèn ông sao, sao năm cánh tươi màu”?", options:[{id:"a",text:"Chiếc đèn ông sao",correct:true},{id:"b",text:"Em yêu trường em",correct:false},{id:"c",text:"Đi học",correct:false},{id:"d",text:"Như có Bác trong ngày đại thắng",correct:false}] },
-    { question:"Trong văn hóa Việt, Trung Thu còn được xem là dịp đặc biệt tôn vinh đối tượng nào?", options:[{id:"a",text:"Trẻ em",correct:true},{id:"b",text:"Ngư dân",correct:false},{id:"c",text:"Vận động viên",correct:false},{id:"d",text:"Nhà khoa học",correct:false}] }
-  ]
+ [
+  {
+   "question": "Tại Hà Nội, con phố nào nổi tiếng với nghề làm và bán đồ chơi Trung Thu truyền thống, đặc biệt là mặt nạ giấy bồi?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Phố Hàng Mã",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Phố Hàng Bạc",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Phố Hàng Thiếc",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Phố Lãn Ông",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Làng nghề nào ở miền Bắc nổi tiếng với nghề làm mặt nạ giấy bồi, từng gắn với những món đồ chơi Trung Thu truyền thống?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Làng Bát Tràng",
+     "correct": false
+    },
+    {
+     "id": "o1",
+     "text": "Làng Ông Hảo",
+     "correct": true
+    },
+    {
+     "id": "o2",
+     "text": "Làng Tò He",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Làng Chuông",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Địa danh nào ở TP.HCM gắn với cộng đồng người Hoa và nổi tiếng với hoạt động làm, bán đèn lồng, đầu lân và các sản phẩm phục vụ Trung Thu?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Chợ Lớn",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Thảo Điền",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Bến Nghé",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Cầu Kho",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Theo tư liệu lịch sử, dưới triều Lý Nhân Tông, Trung Thu tại kinh thành Thăng Long từng được tổ chức với nhiều hoạt động cung đình. Hoạt động nào dưới đây được ghi nhận trong các cuộc vui Trung Thu thời đó?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Thi đấu thuyền và múa rối nước",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Đua voi và săn hổ",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Đấu vật và chọi trâu",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Thi nấu bánh chưng",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Trong nghệ thuật múa lân ở Nam Bộ, đặc biệt tại khu vực Chợ Lớn, nhân vật có đầu và bụng lớn, thường xuất hiện cùng đoàn lân trong các dịp lễ hội là ai?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Ông Địa",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Thổ Địa",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Tề Thiên Đại Thánh",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Phúc Tinh",
+     "correct": false
+    }
+   ]
+  }
+ ],
+ [
+  {
+   "question": "Làng Ông Hảo, nổi tiếng với đồ chơi Trung Thu truyền thống, thuộc tỉnh nào?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Bắc Ninh",
+     "correct": false
+    },
+    {
+     "id": "o1",
+     "text": "Hưng Yên",
+     "correct": true
+    },
+    {
+     "id": "o2",
+     "text": "Nam Định",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Hải Dương",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Trong khu phố cổ Hà Nội, vì sao Hàng Mã có mối liên hệ đặc biệt với các dịp lễ truyền thống như Trung Thu?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Đây vốn là nơi chuyên làm và bán đồ mã, đồ dùng phục vụ nghi lễ và lễ hội",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Đây là nơi tổ chức Trung Thu đầu tiên của Hà Nội",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Đây từng là nơi đặt Hoàng thành Thăng Long",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Đây là nơi vua Lý tổ chức Trung Thu hàng năm",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Trong việc làm đèn ông sao truyền thống của Việt Nam, vật liệu nào thường được dùng để tạo bộ khung hình sao?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Nan tre",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Dây thép",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Gỗ lim",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Mây rừng",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Địa phương nào dưới đây nổi tiếng với nghề làm tò he, một loại đồ chơi dân gian từng rất phổ biến trong dịp Trung Thu?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Xuân La, Hà Nội",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Đông Hồ, Bắc Ninh",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Bát Tràng, Hà Nội",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Phù Lãng, Bắc Ninh",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Địa danh nào dưới đây được xem là một trong những trung tâm quan trọng của cộng đồng người Hoa tại TP.HCM, nơi có nhiều hội quán và cơ sở tín ngưỡng người Hoa?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Chợ Lớn",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Nhà Bè",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Củ Chi",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Cần Giờ",
+     "correct": false
+    }
+   ]
+  }
+ ],
+ [
+  {
+   "question": "Tại Trung Quốc, lễ hội Trung Thu truyền thống còn được gọi bằng tên nào dưới đây?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Zhongqiu Jie",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Qingming Jie",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Duanwu Jie",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Dongzhi Jie",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Trong văn hóa Tsukimi của Nhật Bản, ngoài bánh dango, loại cỏ nào thường được dùng để trang trí và tượng trưng cho mùa thu?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Tre",
+     "correct": false
+    },
+    {
+     "id": "o1",
+     "text": "Susuki",
+     "correct": true
+    },
+    {
+     "id": "o2",
+     "text": "Trúc đào",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Hoa anh đào",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Trong bốn địa danh dưới đây, địa danh nào KHÔNG gắn trực tiếp với một nghề/đồ chơi thường xuất hiện trong câu chuyện Trung Thu?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Hàng Mã — Hà Nội",
+     "correct": false
+    },
+    {
+     "id": "o1",
+     "text": "Xuân La — Hà Nội",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Ông Hảo — Hưng Yên",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Bát Tràng — Hà Nội",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "question": "Một nhà nghiên cứu nói: ‘Việc Trung Thu xuất hiện trong tư liệu cung đình Việt Nam từ thời Lý chứng minh rằng Trung Thu ngày nay hoàn toàn giữ nguyên hình thức như thời Lý.’ Nhận định nào chính xác nhất?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Đúng, vì lễ hội truyền thống không thay đổi",
+     "correct": false
+    },
+    {
+     "id": "o1",
+     "text": "Đúng, vì Trung Thu luôn dành chủ yếu cho trẻ em",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Không chính xác, vì lễ hội có thể tiếp tục tồn tại nhưng thực hành, đối tượng tham gia và ý nghĩa xã hội có thể thay đổi theo thời gian",
+     "correct": true
+    },
+    {
+     "id": "o3",
+     "text": "Sai, vì Trung Thu chỉ mới xuất hiện ở Việt Nam từ thế kỷ XX",
+     "correct": false
+    }
+   ]
+  },
+  {
+   "question": "Cặp nào dưới đây ghép ĐÚNG ‘địa danh – truyền thống văn hóa’?",
+   "options": [
+    {
+     "id": "o0",
+     "text": "Xuân La — nghề tò he",
+     "correct": true
+    },
+    {
+     "id": "o1",
+     "text": "Ông Hảo — nghề làm gốm",
+     "correct": false
+    },
+    {
+     "id": "o2",
+     "text": "Hàng Mã — nghề dệt lụa",
+     "correct": false
+    },
+    {
+     "id": "o3",
+     "text": "Bát Tràng — nghề làm mặt nạ giấy bồi",
+     "correct": false
+    }
+   ]
+  }
+ ]
 ];
 const bonusQuestions = [
-  { question:"Loại đồ chơi giấy truyền thống có thể xoay quanh trục, thường thấy trong dịp Trung Thu là gì?", options:[{id:"b1",text:"Đèn kéo quân",correct:true},{id:"b2",text:"Tò he",correct:false},{id:"b3",text:"Con quay gỗ",correct:false},{id:"b4",text:"Diều sáo",correct:false}] },
-  { question:"Trong hình ảnh dân gian, chị Hằng thường được nhắc đến là người sống ở đâu?", options:[{id:"b1",text:"Cung trăng",correct:true},{id:"b2",text:"Long cung",correct:false},{id:"b3",text:"Núi Tản Viên",correct:false},{id:"b4",text:"Đỉnh Fansipan",correct:false}] },
-  { question:"Điều nào góp phần tạo nên ý nghĩa gắn kết của đêm Trung Thu?", options:[{id:"b1",text:"Gia đình quây quần ngắm trăng",correct:true},{id:"b2",text:"Thi đấu thể thao",correct:false},{id:"b3",text:"Đi công tác xa",correct:false},{id:"b4",text:"Dọn kho cuối năm",correct:false}] },
-  { question:"Bánh trung thu truyền thống thường mang hình dạng nào?", options:[{id:"b1",text:"Tròn hoặc vuông",correct:true},{id:"b2",text:"Tam giác",correct:false},{id:"b3",text:"Ngôi sao năm cánh",correct:false},{id:"b4",text:"Lục giác",correct:false}] },
-  { question:"Địa danh nào sau đây thuộc Việt Nam và nổi tiếng với phố đèn lồng?", options:[{id:"b1",text:"Hội An",correct:true},{id:"b2",text:"Luang Prabang",correct:false},{id:"b3",text:"Kyoto",correct:false},{id:"b4",text:"Seoul",correct:false}] }
+ {
+  "question": "Trong văn hóa Trung Thu hiện đại ở Đài Loan, hoạt động nào đã trở thành một hiện tượng xã hội rất đặc trưng, dù không phải nghi lễ Trung Thu cổ truyền?",
+  "options": [
+   {
+    "id": "b0",
+    "text": "Ăn bánh dứa cùng trà",
+    "correct": false
+   },
+   {
+    "id": "b1",
+    "text": "Tổ chức BBQ ngoài trời cùng gia đình, bạn bè",
+    "correct": true
+   },
+   {
+    "id": "b2",
+    "text": "Rước đèn ông sao quanh khu phố",
+    "correct": false
+   },
+   {
+    "id": "b3",
+    "text": "Thả đèn trời vào đêm Rằm",
+    "correct": false
+   }
+  ]
+ }
 ];
 // gán mã câu hỏi để thống kê
 questionGroups.forEach((g,gi)=>g.forEach((q,qi)=>q.qid=`G${gi+1}-${qi+1}`));
@@ -414,11 +794,12 @@ function feedbackCard(ok,symbol,title,msg){
 }
 function showFeedback(ok){
   const correct=state.currentOptions.find(o=>o.correct).text;
-  let msg=ok?`Bạn nhận ${POINTS[state.currentPosition-1].toLocaleString("vi-VN")} điểm.`:`Đáp án đúng: ${correct}`;
+  let msg=ok?`Bạn nhận ${POINTS[state.currentPosition-1].toLocaleString("vi-VN")} điểm.`:`Đáp án đúng: ${correct}. Lượt chơi của bạn đã kết thúc.`;
   if(ok&&state.currentPosition===5)msg+=' 🎉 Mở khóa 50:50!';
   if(ok&&state.currentPosition===7)msg+=' 🎉 Mở khóa ĐỔI CÂU (dùng ở câu 8–12)!';
   feedbackCard(ok,ok?"✓":"×",ok?"CHÍNH XÁC!":"CHƯA CHÍNH XÁC",msg);
-  transitionTimer=setTimeout(()=>{$("feedback-overlay").classList.remove("show");advanceAfterQuestion()},ok&&(state.currentPosition===5||state.currentPosition===7)?2600:1900);
+  if(!ok){state.endReason='wrong';transitionTimer=setTimeout(()=>{$("feedback-overlay").classList.remove("show");showResult()},2600);return}
+  transitionTimer=setTimeout(()=>{$("feedback-overlay").classList.remove("show");advanceAfterQuestion()},(state.currentPosition===5||state.currentPosition===7)?2600:1900);
 }
 function handleTimeOut(){
   if(state.answered||state.finished)return;state.answered=true;cancelTimers();
@@ -474,7 +855,7 @@ function showResult(){
   $("result-name").textContent=state.playerName;$("result-department").textContent=state.department;
   $("result-score").textContent=state.score.toLocaleString("vi-VN");$("result-correct").textContent=`${state.correctCount}/15`;
   $("result-played").textContent=`${state.playedCount}/15`;$("result-time").textContent=fmtDur(state.totalMs);
-  const reason=state.endReason==='closed'?'⏰ Chương trình đã hết giờ. ':state.endReason==='timeout'?'⌛ Bạn đã hết thời gian ở một câu hỏi. ':'';
+  const reason=state.endReason==='closed'?'⏰ Chương trình đã hết giờ. ':state.endReason==='timeout'?'⌛ Bạn đã hết thời gian ở một câu hỏi. ':state.endReason==='wrong'?`✕ Dừng ở câu ${state.currentPosition}. `:'';
   $("result-message").textContent=reason+(state.score>=8000?"Xuất sắc! Bạn đã chinh phục đêm hội trăng rằm bằng kiến thức ấn tượng.":state.score>=4000?"Rất đáng khen! Bạn có một hành trình đầy bản lĩnh và hiểu biết.":"Cảm ơn bạn đã tham gia thử thách Trung Thu!")+` (${state.score.toLocaleString('vi-VN')} / ${MAX_SCORE.toLocaleString('vi-VN')} điểm)`;
   $("result-stamp").textContent=`Hoàn thành lúc ${vnFull(state.finishedAt)}`;
   beep(784,.3);saveResult();
